@@ -74,6 +74,17 @@ CandyShop.Notifications = (function(self, Candy, $) {
    * @return void
    */
   self.handleOnShow = function(e, args) {
+    console.log("ONSHOW FROM \"" + args.name + "\" ME \"" + Candy.Core.getUser().getNick());
+    if (args.name == Candy.Core.getUser().getNick()) {
+      xmlHttp = new XMLHttpRequest();
+      xmlHttp.open('GET', 'http://127.0.0.1:7076/blinkoff', true);
+      xmlHttp.send(null);
+    } else if (self.mentionsMe(args.message)) {
+      xmlHttp = new XMLHttpRequest();
+      xmlHttp.open('GET', 'http://127.0.0.1:7076/blinkon', true);
+      xmlHttp.send(null);
+    }
+    
     // Check if window has focus, so no notification needed
     if (!document.hasFocus()) {
       if(_options.notifyNormalMessage ||
