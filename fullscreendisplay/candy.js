@@ -25,6 +25,24 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 	};
 
 	var fontSizeCache = undefined;
+    
+    function resizeFont(container, fontSizeCache)
+    {
+        			  if (fontSizeCache) {
+				//console.log('Using cache!');
+			  	container.style.fontSize = fontSizeCache + 'px';
+			  } else {
+				  //console.log('Not using cache');
+				  var fontsize = 1000;
+				  container.style.fontSize = fontsize + 'px';
+				  while ((container.scrollWidth > container.offsetWidth) || (container.scrollHeight > container.offsetHeight)) {
+				    fontsize--;
+				    container.style.fontSize = fontsize + 'px';
+				    fontSizeCache = fontsize;
+				  }
+				  //console.log('fontSizeCache POST ' + fontSizeCache);
+			  }
+    }
 	
 	/** Function: init
 	 * Initialize the fullscreendisplay plugin
@@ -81,6 +99,9 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 			
 			
             if(message.indexOf(exStartTimer) !== -1){
+                if (!(container.message)) {
+                container.message = "";
+                }
                 console.log('START TIMER');
                 
                 
@@ -111,8 +132,8 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
                 var timeString = hours + ":" + minutes + ":" + seconds;
 			  
 			  
-			  //container.innerHTML = timeString + " " + message.replace(regex, '$2');
-                container.innerHTML = timeString;
+			  container.innerHTML = timeString + " " + container.message;
+                //container.innerHTML = timeString;
                 container.style.display = 'inline';
               
               if (--timer < 0) {
@@ -121,20 +142,8 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 			
 			  // Now make the text as large as possible while still displaying the whole text
 			  //console.log('fontSizeCache PRE ' + fontSizeCache);
-			  if (fontSizeCache) {
-				//console.log('Using cache!');
-			  	container.style.fontSize = fontSizeCache + 'px';
-			  } else {
-				  //console.log('Not using cache');
-				  var fontsize = 1000;
-				  container.style.fontSize = fontsize + 'px';
-				  while ((container.scrollWidth > container.offsetWidth) || (container.scrollHeight > container.offsetHeight)) {
-				    fontsize--;
-				    container.style.fontSize = fontsize + 'px';
-				    fontSizeCache = fontsize;
-				  }
-				  //console.log('fontSizeCache POST ' + fontSizeCache);
-			  }
+			  resizeFont(container, fontSizeCache);
+
 			}, 1000);
 			
 			return args.message;
@@ -145,16 +154,26 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
             else if(message.indexOf(exResetTimer) !== -1){
                 console.log('Reset TIMER');
                 
+                if (!(container.message)) {
+                    container.message = '';
+                }
                 
                 
                 clearInterval(updateTimeout);
                 var timeString = "01:00:00";
-                container.innerHTML = timeString;
+                container.innerHTML = timeString + ' ' + container.message;
+                resizeFont(container, fontSizeCache);
 
                
             }
             else{
             
+            container.message = message.replace(regex, '$2');
+            if (container.innerHTML.startsWith("01:00:00")){
+                var timeString = "01:00:00";
+                container.innerHTML = timeString + ' ' + container.message;
+                resizeFont(container, fontSizeCache);
+            }
 			console.log('WE ARE TO DISPLAY IT FULLSCREEN');
             
         }
