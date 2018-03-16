@@ -17,12 +17,14 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 	 *   (Array of String) fullscreenUsers - The usernames for which to display the messages as fullscreen
 	 */
 	var _options = {
-		fullscreenUsers: []
+		fullscreenUsers: ['band']
 	};
 	
 	var _getNick = function() {
 		return Candy.Core.getUser().getNick();
 	};
+
+	var fontSizeCache = undefined;
 	
 	/** Function: init
 	 * Initialize the fullscreendisplay plugin
@@ -39,22 +41,30 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 		var container = document.createElement('div');
 		container.setAttribute('id', 'candy-fullscreendisplay-message');
 		document.body.appendChild(container);
+		
+		var updateTimeout = window.setInterval(function() {}, 500);
 
 		// bind to the after-Show event
 		$(Candy).on('candy:view.message.after-show', function(e, args) {
-			//console.log('MESSAGE: ' + args.message);
+			console.log('FSM MESSAGE: ' + args.message);
+			console.log('FSM MESSAGE SPLIT: ' + args.message.split("|")[2]);
 			
 			// Check if the message is intended for us and in the correct format
+			//var message = args.message.split("|")[2]
+			var message = args.message;
 			var regex = new RegExp('^(@' + _getNick() + ':)(.*)', 'ig');
-			if (!regex.test(args.message)) {
+//			console.log('FSM Regex test: ' + regex.test(message));
+			if (!regex.test(message)) {
+				console.log('NO MATCH => RETURN');
 				return args.message;
 			}
 			
-			//console.log('MESSAGE MATCHES PATTERN');
+			console.log('MESSAGE MATCHES PATTERN');
 		  
 			// Check if we are in the list of users to display the message in fullscreen
 			var match = false;
 			options.fullscreenUsers.forEach(function(name) {
+				console.log('FSM! We are:' + _getNick().toLowerCase() + ' checking against ' + name);
 				if (name.toLowerCase() == _getNick().toLowerCase()) {
 					match = true;
 				}
@@ -64,18 +74,43 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 			}
 			
 			console.log('WE ARE TO DISPLAY IT FULLSCREEN');
+
+			fontSizeCache = undefined;
 			
 			// Change the text in the container and display it without the user-name-prefix
-			container.innerHTML = args.message.replace(regex, '$2');
-			container.style.display = 'inline';
+			window.clearTimeout(updateTimeout);
+			updateTimeout = window.setInterval(function() {
+			  console.log("TICK");
+			  
+			  var now = new Date();
+			  var hours = now.getHours();
+			  if (hours < 10) hours = "0" + hours;
+			  var minutes = now.getMinutes();
+			  if (minutes < 10) minutes = "0" + minutes;
+			  var seconds = now.getSeconds();
+			  if (seconds < 10) seconds = "0" + seconds;
+			  var timeString = hours + ":" + minutes + ":" + seconds;
+			  
+			  container.innerHTML = timeString + " " + message.replace(regex, '$2');
+			  container.style.display = 'inline';
 			
-			// Now make the text as large as possible while still displaying the whole text
-			var fontsize = 1000;
-			container.style.fontSize = fontsize + 'px';
-			while ((container.scrollWidth > container.offsetWidth) || (container.scrollHeight > container.offsetHeight)) {
-			  fontsize--;
-			  container.style.fontSize = fontsize + 'px';
-			}
+			  // Now make the text as large as possible while still displaying the whole text
+			  //console.log('fontSizeCache PRE ' + fontSizeCache);
+			  if (fontSizeCache) {
+				//console.log('Using cache!');
+			  	container.style.fontSize = fontSizeCache + 'px';
+			  } else {
+				  //console.log('Not using cache');
+				  var fontsize = 1000;
+				  container.style.fontSize = fontsize + 'px';
+				  while ((container.scrollWidth > container.offsetWidth) || (container.scrollHeight > container.offsetHeight)) {
+				    fontsize--;
+				    container.style.fontSize = fontsize + 'px';
+				    fontSizeCache = fontsize;
+				  }
+				  //console.log('fontSizeCache POST ' + fontSizeCache);
+			  }
+			}, 1000);
 			
 			return args.message;
 		});
