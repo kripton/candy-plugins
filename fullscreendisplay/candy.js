@@ -53,11 +53,17 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 			//var message = args.message.split("|")[2]
 			var message = args.message;
 			var regex = new RegExp('^(@' + _getNick() + ':)(.*)', 'ig');
+            var exStartTimer = "start";
+            var exResetTimer= "reset";
 //			console.log('FSM Regex test: ' + regex.test(message));
 			if (!regex.test(message)) {
 				console.log('NO MATCH => RETURN');
 				return args.message;
 			}
+			
+			
+			
+			console.log('MESSAGE:',message);
 			
 			console.log('MESSAGE MATCHES PATTERN');
 		  
@@ -73,7 +79,13 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 				return args.message;
 			}
 			
-			console.log('WE ARE TO DISPLAY IT FULLSCREEN');
+			
+            if(message.indexOf(exStartTimer) !== -1){
+                console.log('START TIMER');
+                
+                
+                var duration = 60 * 60;
+            var timer = duration,hours, minutes, seconds;
 
 			fontSizeCache = undefined;
 			
@@ -81,18 +93,31 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 			window.clearTimeout(updateTimeout);
 			updateTimeout = window.setInterval(function() {
 			  console.log("TICK");
+              
+              
+                hours = parseInt(timer / 3600, 10);
+                
+                if((timer%3600)==0){
+                   minutes= 00; 
+                }
+                else
+                {minutes = parseInt(timer / 60, 10);
+                }
+                seconds = parseInt(timer % 60, 10);
+                hours = hours < 10 ? "0" + hours : hours;
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                var timeString = hours + ":" + minutes + ":" + seconds;
 			  
-			  var now = new Date();
-			  var hours = now.getHours();
-			  if (hours < 10) hours = "0" + hours;
-			  var minutes = now.getMinutes();
-			  if (minutes < 10) minutes = "0" + minutes;
-			  var seconds = now.getSeconds();
-			  if (seconds < 10) seconds = "0" + seconds;
-			  var timeString = hours + ":" + minutes + ":" + seconds;
 			  
-			  container.innerHTML = timeString + " " + message.replace(regex, '$2');
-			  container.style.display = 'inline';
+			  //container.innerHTML = timeString + " " + message.replace(regex, '$2');
+                container.innerHTML = timeString;
+                container.style.display = 'inline';
+              
+              if (--timer < 0) {
+                    timer = 0;
+                }
 			
 			  // Now make the text as large as possible while still displaying the whole text
 			  //console.log('fontSizeCache PRE ' + fontSizeCache);
@@ -113,6 +138,26 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 			}, 1000);
 			
 			return args.message;
+                
+                
+                
+            }
+            else if(message.indexOf(exResetTimer) !== -1){
+                console.log('Reset TIMER');
+                
+                
+                
+                clearInterval(updateTimeout);
+                var timeString = "01:00:00";
+                container.innerHTML = timeString;
+
+               
+            }
+            else{
+            
+			console.log('WE ARE TO DISPLAY IT FULLSCREEN');
+            
+        }
 		});
 	};
 
