@@ -130,6 +130,11 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
                 seconds = seconds < 10 ? "0" + seconds : seconds;
 
                 var timeString = hours + ":" + minutes + ":" + seconds;
+                
+                //console.log(args);
+                if ((seconds == 30) || (seconds == 0) || (minutes < 3)) {
+                    Candy.Core.Action.Jabber.Room.Message(args.roomJid, "TIMER: " + timeString, "groupchat");
+                }
 			  
 			  
 			  container.innerHTML = timeString + " " + container.message;
