@@ -102,8 +102,7 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 				}
 				console.log('START TIMER');
 
-				var duration = 60 * 60;
-				var timer = duration,hours, minutes, seconds;
+				var timeStart = new Date();
 
 				fontSizeCache = undefined;
 
@@ -112,31 +111,36 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 				updateTimeout = window.setInterval(function() {
 					console.log("TICK");
 
-					hours = parseInt(timer / 3600, 10);
-					if ((timer%3600) == 0) {
-						minutes= 00;
-					} else {
-						minutes = parseInt(timer / 60, 10);
+					var timeNow = new Date();
+					var timeDiff = timeNow - timeStart;
+
+					// Remaining time in seconds = ((60 minutes * 60 seconds per minute * 1000 msec per s) - timeDiff) / 1000
+					var timeRemaining = ((60 * 60 * 1000) - timeDiff) / 1000;
+					if (timeRemaining < 0) {
+						timeRemaining = 0;
 					}
-					seconds = parseInt(timer % 60, 10);
+
+					console.log('Elapsed: ' + timeDiff/1000 + ' Remaining: ' + timeRemaining);
+
+					hours = parseInt(timeRemaining / 3600, 10);
+					if ((timeRemaining % 3600) == 0) {
+						minutes = 00;
+					} else {
+						minutes = parseInt(timeRemaining / 60, 10);
+					}
+					seconds = parseInt(timeRemaining % 60, 10);
 					hours = hours < 10 ? "0" + hours : hours;
 					minutes = minutes < 10 ? "0" + minutes : minutes;
 					seconds = seconds < 10 ? "0" + seconds : seconds;
 
 					var timeString = hours + ":" + minutes + ":" + seconds;
 
-					//console.log(args);
-
 					if ((seconds == 30) || (seconds == 0) || (minutes < 3)) {
 						Candy.Core.Action.Jabber.Room.Message(args.roomJid, "TIMER: " + timeString, "groupchat");
 					}
 
-					container.innerHTML = timeString + " " + container.message;
+					container.innerHTML = timeString + '<br />' + container.message;
 					container.style.display = 'inline';
-
-					if (--timer < 0) {
-						timer = 0;
-					}
 
 					//Now make the text as large as possible while still displaying the whole text
 					//console.log('fontSizeCache PRE ' + fontSizeCache);
@@ -156,7 +160,7 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 
 				clearInterval(updateTimeout);
 				var timeString = "01:00:00";
-				container.innerHTML = timeString + ' ' + container.message;
+				container.innerHTML = timeString + '<br />' + container.message;
 				resizeFont(container, fontSizeCache);
 			}
 
@@ -164,7 +168,7 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 				container.message = messageContent;
 				if (container.innerHTML.startsWith("01:00:00")) {
 					var timeString = "01:00:00";
-					container.innerHTML = timeString + ' ' + container.message;
+					container.innerHTML = timeString + '<br />' + container.message;
 					resizeFont(container, fontSizeCache);
 				}
 
