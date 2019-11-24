@@ -165,6 +165,7 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 
 			else {
 				container.message = messageContent;
+				CandyShop.fontSizeCache = undefined;
 				if (container.innerHTML.startsWith("01:00:00")) {
 					var timeString = "01:00:00";
 					container.innerHTML = timeString + '<br />' + container.message;
