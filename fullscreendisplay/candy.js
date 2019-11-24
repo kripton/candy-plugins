@@ -24,23 +24,23 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 		return Candy.Core.getUser().getNick();
 	};
 
-	var fontSizeCache = undefined;
+	CandyShop.fontSizeCache = undefined;
 
-	function resizeFont(container, fontSizeCache)
+	function resizeFont(container)
 	{
-		if (fontSizeCache) {
-			//console.log('Using cache!');
-			container.style.fontSize = fontSizeCache + 'px';
+		if (CandyShop.fontSizeCache) {
+			console.log('Using cache: ' + CandyShop.fontSizeCache);
+			container.style.fontSize = CandyShop.fontSizeCache + 'px';
 		} else {
-			//console.log('Not using cache');
+			console.log('Not using cache: Container: ', container);
 			var fontsize = 1000;
 			container.style.fontSize = fontsize + 'px';
 			while ((container.scrollWidth > container.offsetWidth) || (container.scrollHeight > container.offsetHeight)) {
 				fontsize--;
 				container.style.fontSize = fontsize + 'px';
-				fontSizeCache = fontsize;
+				CandyShop.fontSizeCache = fontsize;
 			}
-			//console.log('fontSizeCache POST ' + fontSizeCache);
+			console.log('fontSizeCache POST ' + CandyShop.fontSizeCache);
 		}
 	}
 
@@ -65,10 +65,8 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 		// bind to the after-Show event
 		$(Candy).on('candy:view.message.after-show', function(e, args) {
 			console.log('FSM MESSAGE: ' + args.message);
-			console.log('FSM MESSAGE SPLIT: ' + args.message.split("|")[2]);
 
 			// Check if the message is intended for us and in the correct format
-			//var message = args.message.split("|")[2]
 			var message = args.message;
 			var regex = new RegExp('^(@' + _getNick() + ':)(.*)', 'ig');
 
@@ -104,7 +102,7 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 
 				var timeStart = new Date();
 
-				fontSizeCache = undefined;
+				CandyShop.fontSizeCache = undefined;
 
 				// Change the text in the container and display it without the user-name-prefix
 				window.clearTimeout(updateTimeout);
@@ -144,7 +142,7 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 
 					//Now make the text as large as possible while still displaying the whole text
 					//console.log('fontSizeCache PRE ' + fontSizeCache);
-					resizeFont(container, fontSizeCache);
+					resizeFont(container);
 				}, 1000);
 
 				return args.message;
@@ -161,7 +159,8 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 				clearInterval(updateTimeout);
 				var timeString = "01:00:00";
 				container.innerHTML = timeString + '<br />' + container.message;
-				resizeFont(container, fontSizeCache);
+				container.style.display = 'inline';
+				resizeFont(container);
 			}
 
 			else {
@@ -169,7 +168,8 @@ CandyShop.fullscreendisplay = (function(self, Candy, $) {
 				if (container.innerHTML.startsWith("01:00:00")) {
 					var timeString = "01:00:00";
 					container.innerHTML = timeString + '<br />' + container.message;
-					resizeFont(container, fontSizeCache);
+					container.style.display = 'inline';
+					resizeFont(container);
 				}
 
 				console.log('WE ARE TO DISPLAY IT FULLSCREEN');
